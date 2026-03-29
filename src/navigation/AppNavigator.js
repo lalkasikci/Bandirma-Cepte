@@ -2,6 +2,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
+import WeatherScreen from '../screens/WeatherScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ export default function AppNavigator() {
           component={NewsScreen}
           options={{ title: 'Haberler' }}
         />
+        <Stack.Screen name="Weather" component={WeatherScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
