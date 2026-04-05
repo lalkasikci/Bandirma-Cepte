@@ -1,28 +1,150 @@
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import { getEarthquakes } from '../services/earthquakeService';
 
 export default function EarthquakeScreen() {
-  const earthquakes = [
-    { id: '1', place: 'Balıkesir - Bandırma Yakını', magnitude: 2.8, time: 'Bugün 14:20' },
-    { id: '2', place: 'Bursa - Gemlik', magnitude: 3.4, time: 'Bugün 11:05' },
-    { id: '3', place: 'Çanakkale', magnitude: 2.6, time: 'Dün 22:40' },
-    { id: '4', place: 'İzmir', magnitude: 4.1, time: 'Dün 18:15' },
-  ];
+  const [earthquakes, setEarthquakes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getEarthquakes();
+        setEarthquakes(data);
+        console.log('ILK DEPREM:', data[0]);
+      } catch (err) {
+        console.log('EARTHQUAKE ERROR:', err);
+        setError('Deprem verisi alınamadı');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, []);
+  function formatDate(item) {
+  const rawDate =
+    item.date ||
+    item.date_time ||
+    item.time ||
+    item.timestamp ||
+    item.created_at;
+
+  if (!rawDate) return 'Tarih yok';
+
+  const date = new Date(rawDate);
+
+  if (isNaN(date)) return String(rawDate);
+
+  return date.toLocaleString('tr-TR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+
+  const getMagnitudeColor = (mag) => {
+    if (mag >= 5) return '#D64545';
+    if (mag >= 4) return '#F39C12';
+    return '#2E86DE';
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#4A6CF7" />
+        <Text style={styles.loadingText}>Deprem verileri yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (earthquakes.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Bandırma'ya yakın deprem bulunamadı</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Son Depremler</Text>
-      <Text style={styles.subtitle}>Yakın zamanda kaydedilen bazı depremler</Text>
+      <Text style={styles.pageTitle}>Bandırma'ya Yakın Depremler</Text>
+      <Text style={styles.pageSubtitle}>
+        Bandırma çevresindeki son deprem kayıtları
+      </Text>
 
       <FlatList
         data={earthquakes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) =>
+          item.earthquake_id?.toString() || index.toString()
+        }
+        contentContainerStyle={{ paddingBottom: 20 }}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View style={styles.row}>
-              <Text style={styles.place}>{item.place}</Text>
-              <Text style={styles.mag}>M {item.magnitude}</Text>
+            <View style={styles.cardTopRow}>
+              <Text style={styles.location} numberOfLines={2}>
+                {item.title || 'Konum bilgisi yok'}
+              </Text>
+
+              <View
+                style={[
+                  styles.magnitudeBadge,
+                  { backgroundColor: getMagnitudeColor(item.mag || 0) },
+                ]}
+              >
+                <Text style={styles.magnitudeText}>
+                  {item.mag ?? '-'}
+                </Text>
+              </View>
             </View>
-            <Text style={styles.time}>{item.time}</Text>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Tarih</Text>
+              <Text style={styles.infoValue}>
+              {formatDate(item)}
+              </Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Derinlik</Text>
+              <Text style={styles.infoValue}>
+                {item.depth != null ? `${item.depth} km` : 'Bilinmiyor'}
+              </Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Bandırma'ya Uzaklık</Text>
+              <Text style={styles.infoValue}>
+                {item.distanceKm != null
+                  ? `${item.distanceKm.toFixed(1)} km`
+                  : 'Bilinmiyor'}
+              </Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Kaynak</Text>
+              <Text style={styles.infoValue}>
+                {item.provider?.toUpperCase() || 'AFAD'}
+              </Text>
+            </View>
           </View>
         )}
       />
@@ -37,47 +159,87 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
   },
-  title: {
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F4F7FB',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#555',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#D64545',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  pageTitle: {
     fontSize: 28,
     fontWeight: '800',
     color: '#1E2A3A',
   },
-  subtitle: {
-    marginTop: 6,
-    marginBottom: 20,
+  pageSubtitle: {
     fontSize: 14,
     color: '#69748C',
+    marginTop: 4,
+    marginBottom: 18,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
   },
-  row: {
+  cardTopRow: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 12,
+    marginBottom: 14,
   },
-  place: {
+  location: {
     flex: 1,
     fontSize: 16,
     fontWeight: '700',
     color: '#1E2A3A',
+    lineHeight: 22,
   },
-  mag: {
+  magnitudeBadge: {
+    minWidth: 54,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  magnitudeText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
-    color: '#D64545',
   },
-  time: {
-    marginTop: 8,
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    gap: 12,
+  },
+  infoLabel: {
     fontSize: 13,
     color: '#69748C',
+  },
+  infoValue: {
+    fontSize: 13,
+    color: '#1E2A3A',
+    fontWeight: '600',
+    maxWidth: '65%',
+    textAlign: 'right',
   },
 });

@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
+import PharmacyScreen from '../screens/PharmacyScreen';
+import BusTimeScreen from '../screens/BusTimeScreen';
 import WeatherScreen from '../screens/WeatherScreen';
 import EarthquakeScreen from '../screens/EarthquakeScreen';
 
@@ -11,11 +13,67 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Bandırma Cepte' }} />
-        <Stack.Screen name="News" component={NewsScreen} options={{ title: 'Haberler' }} />
-        <Stack.Screen name="Weather" component={WeatherScreen} options={{ title: 'Hava Durumu' }} />
-        <Stack.Screen name="Earthquake" component={EarthquakeScreen} options={{ title: 'Son Depremler' }} />
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#F5F7FC',
+          },
+          headerShadowVisible: false,
+          headerTintColor: '#182033',
+          headerTitleStyle: {
+            fontWeight: '700',
+            fontSize: 18,
+          },
+          contentStyle: {
+            backgroundColor: '#F5F7FC',
+          },
+        }}
+      >
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="Weather"
+          component={WeatherScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="Earthquake"
+          component={EarthquakeScreen}
+          options={{
+           headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="News"
+          component={NewsScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Pharmacy"
+          component={PharmacyScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Bus"
+          component={BusTimeScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

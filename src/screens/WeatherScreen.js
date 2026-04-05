@@ -1,31 +1,79 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { getBandirmaWeather } from '../services/weatherService';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+  Pressable,
+} from 'react-native';
+import {
+  getBandirmaWeather,
+  getBandirmaForecast,
+} from '../services/weatherService';
 
-export default function WeatherScreen() {
+export default function WeatherScreen({ navigation }) {
   const [weather, setWeather] = useState(null);
+  const [forecast, setForecast] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    async function fetchWeather() {
+    async function fetchWeatherData() {
       try {
-        const data = await getBandirmaWeather();
-        setWeather(data);
+        const [currentData, forecastData] = await Promise.all([
+          getBandirmaWeather(),
+          getBandirmaForecast(),
+        ]);
+
+        setWeather(currentData);
+        setForecast(forecastData);
       } catch (err) {
+        console.log('WEATHER ERROR:', err);
         setError('Veri alınırken hata oluştu');
       } finally {
         setLoading(false);
       }
     }
 
-    fetchWeather();
+    fetchWeatherData();
   }, []);
+
+  function getWeatherEmoji(main) {
+    switch (main?.toLowerCase()) {
+      case 'clear':
+        return '☀️';
+      case 'clouds':
+        return '☁️';
+      case 'rain':
+        return '🌧️';
+      case 'thunderstorm':
+        return '⛈️';
+      case 'snow':
+        return '❄️';
+      case 'mist':
+      case 'fog':
+      case 'haze':
+        return '🌫️';
+      default:
+        return '🌤️';
+    }
+  }
+
+  function formatDay(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+    });
+  }
 
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#4A6CF7" />
+        <ActivityIndicator size="large" color="#5B6EF5" />
         <Text style={styles.loadingText}>Hava durumu yükleniyor...</Text>
       </View>
     );
@@ -39,57 +87,114 @@ export default function WeatherScreen() {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.city}>Bandırma</Text>
-      <Text style={styles.pageTitle}>Güncel Hava Durumu</Text>
+  const emoji = getWeatherEmoji(weather.weather?.[0]?.main);
 
-      <View style={styles.mainCard}>
-        <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
-        <Text style={styles.description}>
-          {weather.weather[0].description}
-        </Text>
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.topShape} />
+      <View style={styles.bottomShape} />
+
+      <View style={styles.headerRow}>
+        <Pressable
+          style={styles.homeButton}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.homeButtonIcon}>⌂</Text>
+        </Pressable>
+
+        <View style={styles.headerTextArea}>
+          <Text style={styles.city}>Bandırma Cepte.</Text>
+          
+        </View>
       </View>
 
-      <View style={styles.infoRow}>
+      <View style={styles.heroCard}>
+        <View style={styles.heroTop}>
+          <Text style={styles.heroEmoji}>{emoji}</Text>
+          <View style={styles.heroTextArea}>
+            <Text style={styles.heroLabel}>Bugün</Text>
+            <Text style={styles.description}>
+              {weather.weather[0].description}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.heroBottom}>
+          <Text style={styles.temperature}>{Math.round(weather.main.temp)}°C</Text>
+          <Text style={styles.feelsLike}>
+            Hissedilen {Math.round(weather.main.feels_like)}°C
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.sectionTitle}>Detaylar</Text>
+
+      <View style={styles.grid}>
         <View style={styles.infoCard}>
+          <Text style={styles.cardIcon}>💧</Text>
           <Text style={styles.label}>Nem</Text>
           <Text style={styles.value}>%{weather.main.humidity}</Text>
         </View>
 
         <View style={styles.infoCard}>
+          <Text style={styles.cardIcon}>🌬️</Text>
           <Text style={styles.label}>Rüzgar</Text>
           <Text style={styles.value}>{weather.wind.speed} m/s</Text>
         </View>
-      </View>
-
-      <View style={styles.infoRow}>
-        <View style={styles.infoCard}>
-          <Text style={styles.label}>Hissedilen</Text>
-          <Text style={styles.value}>{Math.round(weather.main.feels_like)}°C</Text>
-        </View>
 
         <View style={styles.infoCard}>
+          <Text style={styles.cardIcon}>🌡️</Text>
           <Text style={styles.label}>Basınç</Text>
           <Text style={styles.value}>{weather.main.pressure} hPa</Text>
         </View>
+
+        <View style={styles.infoCard}>
+          <Text style={styles.cardIcon}>👀</Text>
+          <Text style={styles.label}>Durum</Text>
+          <Text style={styles.valueSmall}>
+            {weather.weather[0].main || 'Bilgi yok'}
+          </Text>
+        </View>
       </View>
-    </View>
+
+      <Text style={styles.sectionTitle}>5 Günlük Tahmin</Text>
+
+      <View style={styles.forecastList}>
+        {forecast.map((item, index) => (
+          <View key={index} style={styles.forecastCard}>
+            <Text style={styles.forecastDay}>{formatDay(item.date)}</Text>
+            <Text style={styles.forecastEmoji}>
+              {getWeatherEmoji(item.main)}
+            </Text>
+            <Text style={styles.forecastTemp}>{item.temp}°</Text>
+            <Text style={styles.forecastRange}>
+              {item.tempMin}° / {item.tempMax}°
+            </Text>
+            <Text style={styles.forecastDesc} numberOfLines={2}>
+              {item.description}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F4F7FB',
+    backgroundColor: '#F5F7FC',
+  },
+  content: {
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 24,
+    paddingBottom: 32,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F4F7FB',
+    backgroundColor: '#F5F7FC',
   },
   loadingText: {
     marginTop: 12,
@@ -101,66 +206,213 @@ const styles = StyleSheet.create({
     color: '#D64545',
     fontWeight: '600',
   },
-  city: {
-    fontSize: 30,
-    fontWeight: '700',
-    color: '#1E2A3A',
+
+  topShape: {
+    position: 'absolute',
+    top: -50,
+    right: -70,
+    width: 220,
+    height: 180,
+    backgroundColor: '#DCE3FF',
+    borderRadius: 120,
+    opacity: 0.8,
   },
-  pageTitle: {
-    fontSize: 16,
-    color: '#69748C',
-    marginTop: 4,
-    marginBottom: 20,
+  bottomShape: {
+    position: 'absolute',
+    left: -60,
+    bottom: 30,
+    width: 170,
+    height: 170,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 90,
+    opacity: 0.9,
   },
-  mainCard: {
-    backgroundColor: '#4A6CF7',
-    borderRadius: 20,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 5,
+    gap: 12,
   },
-  temperature: {
-    fontSize: 48,
+  homeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1B1F2A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  homeButtonIcon: {
+    fontSize: 20,
+    color: '#182033',
     fontWeight: '800',
-    color: '#FFFFFF',
+  },
+  headerTextArea: {
+    flex: 1,
+  },
+  city: {
+    fontSize: 30,
+    fontWeight: '800',
+    color: '#182033',
+  },
+  pageTitle: {
+    fontSize: 15,
+    color: '#6F7A8B',
+    marginTop: 4,
+  },
+
+  heroCard: {
+    backgroundColor: '#5B6EF5',
+    borderRadius: 28,
+    padding: 22,
+    marginBottom: 24,
+    shadowColor: '#24307A',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  heroTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 26,
+  },
+  heroEmoji: {
+    fontSize: 42,
+    marginRight: 14,
+  },
+  heroTextArea: {
+    flex: 1,
+  },
+  heroLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DDE4FF',
+    marginBottom: 4,
+    letterSpacing: 0.4,
   },
   description: {
     fontSize: 18,
-    color: '#EAF0FF',
-    marginTop: 8,
+    color: '#FFFFFF',
+    fontWeight: '600',
     textTransform: 'capitalize',
   },
-  infoRow: {
+  heroBottom: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.18)',
+    paddingTop: 18,
+  },
+  temperature: {
+    fontSize: 56,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 62,
+  },
+  feelsLike: {
+    marginTop: 6,
+    fontSize: 15,
+    color: '#E6EBFF',
+    fontWeight: '500',
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#182033',
+    marginBottom: 14,
+  },
+
+  grid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 14,
   },
   infoCard: {
     width: '48%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    paddingVertical: 20,
+    borderRadius: 20,
+    paddingVertical: 18,
     paddingHorizontal: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    marginBottom: 14,
+    shadowColor: '#1B1F2A',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  cardIcon: {
+    fontSize: 22,
+    marginBottom: 10,
   },
   label: {
-    fontSize: 14,
-    color: '#69748C',
+    fontSize: 13,
+    color: '#7A8597',
     marginBottom: 8,
+    fontWeight: '600',
   },
   value: {
     fontSize: 22,
+    fontWeight: '800',
+    color: '#182033',
+  },
+  valueSmall: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#182033',
+  },
+
+  forecastList: {
+    gap: 12,
+  },
+  forecastCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#1B1F2A',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  forecastDay: {
+    width: 72,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#1E2A3A',
+    color: '#182033',
+  },
+  forecastEmoji: {
+    fontSize: 24,
+    width: 40,
+    textAlign: 'center',
+  },
+  forecastTemp: {
+    width: 52,
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#182033',
+    textAlign: 'center',
+  },
+  forecastRange: {
+    width: 72,
+    fontSize: 12,
+    color: '#7A8597',
+    textAlign: 'center',
+  },
+  forecastDesc: {
+    flex: 1,
+    fontSize: 13,
+    color: '#5F6B7A',
+    textTransform: 'capitalize',
+    textAlign: 'right',
+    marginLeft: 8,
   },
 });
