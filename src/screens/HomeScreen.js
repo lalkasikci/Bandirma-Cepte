@@ -142,7 +142,7 @@ export default function HomeScreen({ navigation }) {
         </ScalePressable>
       </FadeSlide>
 
-      {/* ══════════════ SON DAKİKA HABERLERİ ══════════════ */}
+      
       <FadeSlide delay={100}>
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   seeAll: { fontSize: 12, fontWeight: '700', color: INDIGO },
 
-  /* ── Haberler ── */
+  
   newsScrollInner: { gap: 12, paddingRight: 4 },
   newsCard: {
     backgroundColor: '#fff',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   newsCardTitle: { fontSize: 13, fontWeight: '700', color: SLATE, lineHeight: 19, marginBottom: 6 },
   newsCardTime:  { fontSize: 11, color: MUTED, fontWeight: '500' },
 
-  /* ── Depremler ── */
+ 
   eqList: {
     backgroundColor: '#fff',
     borderRadius: 22,

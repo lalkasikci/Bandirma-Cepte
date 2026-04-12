@@ -28,7 +28,7 @@ export async function getBandirmaNews() {
   const bandirmaNews = mappedNews.filter((item) => item.isBandirma);
   const otherNews = mappedNews.filter((item) => !item.isBandirma);
 
-  // Önce Bandırma haberleri gelsin, yetmezse diğerlerini ekle
+  
   return [...bandirmaNews, ...otherNews].slice(0, 15);
 }
 
