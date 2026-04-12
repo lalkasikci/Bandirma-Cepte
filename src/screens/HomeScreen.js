@@ -121,7 +121,7 @@ export default function HomeScreen({ navigation }) {
             <Image
               source={require('../../assets/icon.png')}
               style={styles.logo}
-              resizeMode="cover"
+              resizeMode="contain"
             />
           </View>
         </View>
@@ -371,8 +371,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   logoWrap: {
+    width: 88,
+    height: 88,
     borderRadius: 26,
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logo: {
     width: 88,

@@ -103,8 +103,7 @@ export default function WeatherScreen({ navigation }) {
         </Pressable>
 
         <View style={styles.headerTextArea}>
-          <Text style={styles.city}>Bandırma Cepte.</Text>
-          
+          <Text style={styles.pageTitle}>Bandırma Hava Durumu</Text>
         </View>
       </View>
 
@@ -229,7 +228,7 @@ const styles = StyleSheet.create({
   },
 
   headerRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 18,
     gap: 12,
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   headerTextArea: {
-    flex: 1,
+    alignItems: 'center',
   },
   city: {
     fontSize: 30,
@@ -261,9 +260,10 @@ const styles = StyleSheet.create({
     color: '#182033',
   },
   pageTitle: {
-    fontSize: 15,
-    color: '#6F7A8B',
-    marginTop: 4,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#182033',
+    marginTop: 8,
   },
 
   heroCard: {

@@ -5,10 +5,11 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 import { getEarthquakes } from '../services/earthquakeService';
 
-export default function EarthquakeScreen() {
+export default function EarthquakeScreen({ navigation }) {
   const [earthquakes, setEarthquakes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -86,10 +87,21 @@ export default function EarthquakeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.pageTitle}>Bandırma'ya Yakın Depremler</Text>
-      <Text style={styles.pageSubtitle}>
-        Bandırma çevresindeki son deprem kayıtları
-      </Text>
+      <View style={styles.headerRow}>
+        <Pressable
+          style={styles.homeButton}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.homeButtonIcon}>⌂</Text>
+        </Pressable>
+
+        <View style={styles.headerTextArea}>
+          <Text style={styles.pageTitle}>Bandırma'ya Yakın Depremler</Text>
+          <Text style={styles.pageSubtitle}>
+            Bandırma çevresindeki son deprem kayıtları
+          </Text>
+        </View>
+      </View>
 
       <FlatList
         data={earthquakes}
@@ -187,6 +199,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 18,
   },
+  headerRow: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 18,
+    gap: 12,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
@@ -219,6 +237,27 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  homeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1B1F2A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  homeButtonIcon: {
+    fontSize: 20,
+    color: '#182033',
+    fontWeight: '800',
+  },
+  headerTextArea: {
+    alignItems: 'center',
   },
   magnitudeText: {
     color: '#FFFFFF',

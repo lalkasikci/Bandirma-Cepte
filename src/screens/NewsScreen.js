@@ -6,7 +6,7 @@ import {
   ActivityIndicator,
   FlatList,
   Pressable,
-  Image
+  Image,
 } from 'react-native';
 import { getBandirmaNews } from '../services/newsService';
 
@@ -47,8 +47,6 @@ export default function NewsScreen({ navigation }) {
     });
   }
 
-
-
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -76,17 +74,34 @@ export default function NewsScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.pageTitle}>Bandırma Haberleri</Text>
-      <Text style={styles.pageSubtitle}>
-        Yerel kaynaklardan güncel haberler
-      </Text>
+      <View style={styles.topShape} />
+      <View style={styles.bottomShape} />
+
+      <View style={styles.headerRow}>
+        <Pressable
+          style={styles.homeButton}
+          onPress={() => navigation.navigate('Home')}
+        >
+          <Text style={styles.homeButtonIcon}>⌂</Text>
+        </Pressable>
+
+        <View style={styles.headerTextArea}>
+          <Text style={styles.pageTitle}>Bandırma Haberleri</Text>
+          <Text style={styles.pageSubtitle}>
+            Yerel kaynaklardan güncel haberler
+          </Text>
+        </View>
+      </View>
 
       <FlatList
         data={news}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 24 }}
         renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => navigation.navigate('NewsDetail', { item })}>
+          <Pressable
+            style={styles.card}
+            onPress={() => navigation.navigate('NewsDetail', { item })}
+          >
             {item.image ? (
               <Image source={{ uri: item.image }} style={styles.newsImage} />
             ) : null}
@@ -134,6 +149,55 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+
+  topShape: {
+    position: 'absolute',
+    top: -50,
+    right: -70,
+    width: 220,
+    height: 180,
+    backgroundColor: '#DCE3FF',
+    borderRadius: 120,
+    opacity: 0.8,
+  },
+  bottomShape: {
+    position: 'absolute',
+    left: -60,
+    bottom: 30,
+    width: 170,
+    height: 170,
+    backgroundColor: '#EEF2FF',
+    borderRadius: 90,
+    opacity: 0.9,
+  },
+
+  headerRow: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 18,
+    gap: 12,
+  },
+  homeButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#1B1F2A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  homeButtonIcon: {
+    fontSize: 20,
+    color: '#182033',
+    fontWeight: '800',
+  },
+  headerTextArea: {
+    alignItems: 'center',
+  },
   pageTitle: {
     fontSize: 28,
     fontWeight: '800',
@@ -143,8 +207,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#69748C',
     marginTop: 4,
-    marginBottom: 18,
   },
+
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
