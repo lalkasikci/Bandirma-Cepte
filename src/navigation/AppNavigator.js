@@ -40,7 +40,7 @@ export default function AppNavigator() {
           name="NewsDetail"
           component={NewsDetailScreen}
           options={{
-            title: 'Haber Detayı',
+            headerShown: false,
           }}
         />
 
