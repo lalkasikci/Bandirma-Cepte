@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,205 +6,34 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  Animated,
-  Easing,
 } from 'react-native';
 import { getBandirmaWeather } from '../services/weatherService';
 import { getEarthquakes } from '../services/earthquakeService';
-
-function ModuleCard({ emoji, name, hint, bgColor, iconBg, onPress, delay = 0 }) {
-  const scaleAnim = useRef(new Animated.Value(0.88)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-  const pressScale = useRef(new Animated.Value(1)).current;
-  const iconRotate = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 480,
-        delay,
-        easing: Easing.out(Easing.back(1.6)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 360,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
-
-  function handlePressIn() {
-    Animated.parallel([
-      Animated.spring(pressScale, {
-        toValue: 0.96,
-        useNativeDriver: true,
-        speed: 40,
-      }),
-      Animated.timing(iconRotate, {
-        toValue: 1,
-        duration: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }
-
-  function handlePressOut() {
-    Animated.parallel([
-      Animated.spring(pressScale, {
-        toValue: 1,
-        useNativeDriver: true,
-        speed: 20,
-        bounciness: 10,
-      }),
-      Animated.timing(iconRotate, {
-        toValue: 0,
-        duration: 300,
-        easing: Easing.out(Easing.back(2)),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }
-
-  const rotate = iconRotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '-12deg'],
-  });
-
-  return (
-    <Animated.View
-      style={{
-        transform: [{ scale: scaleAnim }, { scale: pressScale }],
-        opacity: opacityAnim,
-      }}
-    >
-      <Pressable
-        style={[styles.moduleCard, { backgroundColor: bgColor }]}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <Animated.View
-          style={[
-            styles.moduleIconWrap,
-            { backgroundColor: iconBg, transform: [{ rotate }] },
-          ]}
-        >
-          <Text style={styles.moduleEmoji}>{emoji}</Text>
-        </Animated.View>
-
-        <View style={styles.moduleCenter}>
-          <Text style={styles.moduleName}>{name}</Text>
-          <Text style={styles.moduleHint}>{hint}</Text>
-        </View>
-
-        <View style={styles.moduleArrowWrap}>
-          <Text style={styles.moduleArrow}>›</Text>
-        </View>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-// ── Animasyonlu Özet Kartı ──
-function SummaryCard({ children, style, delay = 0 }) {
-  const slideAnim = useRef(new Animated.Value(30)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 500,
-        delay,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 400,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
-
-  return (
-    <Animated.View
-      style={[
-        style,
-        {
-          transform: [{ translateY: slideAnim }],
-          opacity: opacityAnim,
-        },
-      ]}
-    >
-      {children}
-    </Animated.View>
-  );
-}
+import { getBandirmaNews } from '../services/newsService';
 
 export default function HomeScreen({ navigation }) {
   const [weather, setWeather] = useState(null);
   const [earthquake, setEarthquake] = useState(null);
+  const [news, setNews] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Hero animasyonları
-  const heroSlide = useRef(new Animated.Value(-20)).current;
-  const heroOpacity = useRef(new Animated.Value(0)).current;
-  const logoPulse = useRef(new Animated.Value(1)).current;
-  const logoGlow = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // Hero giriş
-    Animated.parallel([
-      Animated.timing(heroSlide, {
-        toValue: 0,
-        duration: 600,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(heroOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Logo sürekli pulse
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(logoPulse, {
-          toValue: 1.04,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sine),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoPulse, {
-          toValue: 1,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sine),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-
-  }, []);
 
   useEffect(() => {
     async function fetchHomeData() {
       try {
-        const [weatherData, earthquakeData] = await Promise.all([
+        const [weatherData, earthquakeData, newsData] = await Promise.all([
           getBandirmaWeather(),
           getEarthquakes(),
+          getBandirmaNews(),
         ]);
+
         setWeather(weatherData);
+
         if (earthquakeData && earthquakeData.length > 0) {
           setEarthquake(earthquakeData[0]);
+        }
+
+        if (newsData && newsData.length > 0) {
+          setNews(newsData[0]);
         }
       } catch (error) {
         console.log('HOME SCREEN DATA ERROR:', error);
@@ -212,6 +41,7 @@ export default function HomeScreen({ navigation }) {
         setLoading(false);
       }
     }
+
     fetchHomeData();
   }, []);
 
@@ -245,16 +75,23 @@ export default function HomeScreen({ navigation }) {
     return `${earthquake.distanceKm.toFixed(1)} km`;
   }
 
+  function getNewsTitle() {
+    if (loading) return 'Yükleniyor...';
+    if (!news) return 'Haber bulunamadı';
+    return shortenText(news.title || 'Başlık yok', 100);
+  }
+
+  function getNewsSource() {
+    if (loading) return '...';
+    if (!news) return 'Kaynak yok';
+    return news.source || 'Kaynak yok';
+  }
+
   function shortenText(text, maxLength) {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   }
-
-  const glowOpacity = logoGlow.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.3, 0.7],
-  });
 
   return (
     <ScrollView
@@ -262,26 +99,11 @@ export default function HomeScreen({ navigation }) {
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      {/* Arka plan dekorasyonları */}
       <View style={styles.bgOrb1} />
       <View style={styles.bgOrb2} />
       <View style={styles.bgOrb3} />
 
-      {/* ── HERO KART ── */}
-      <Animated.View
-        style={[
-          styles.heroCard,
-          {
-            transform: [{ translateY: heroSlide }],
-            opacity: heroOpacity,
-          },
-        ]}
-      >
-        {/* İç dekoratif çizgiler */}
-        <View style={styles.heroLine1} />
-        <View style={styles.heroLine2} />
-
-        {/* Canlı göstergesi */}
+      <View style={styles.heroCard}>
         <View style={styles.heroBadgeRow}>
           <View style={styles.liveDot} />
           <Text style={styles.liveTxt}>CANLI</Text>
@@ -295,40 +117,25 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
 
-          {/* Logo - ortalanmış, pulse animasyonu */}
-          <View style={styles.logoContainer}>
-            <Animated.View
-              style={[
-                styles.logoGlow,
-                { opacity: glowOpacity },
-              ]}
+          <View style={styles.logoWrap}>
+            <Image
+              source={require('../../assets/icon.png')}
+              style={styles.logo}
+              resizeMode="cover"
             />
-            <Animated.View
-              style={[
-                styles.logoWrap,
-                { transform: [{ scale: logoPulse }] },
-              ]}
-            >
-              <Image
-                source={require('../../assets/icon.png')}
-                style={styles.logo}
-                resizeMode="cover"
-              />
-            </Animated.View>
           </View>
         </View>
-      </Animated.View>
+      </View>
 
-      {/* ── BÖLÜM ETİKETİ ── */}
       <View style={styles.sectionLabel}>
         <View style={styles.sectionLine} />
         <Text style={styles.sectionLabelText}>CANLI VERİ</Text>
         <View style={styles.sectionLine} />
       </View>
 
-      {/* ── ÖZET KARTLAR ── */}
+      {/* ÜSTTE YAN YANA: HAVA + DEPREM */}
       <View style={styles.summaryRow}>
-        <SummaryCard style={[styles.summaryCard, styles.weatherCard]} delay={100}>
+        <View style={[styles.summaryCard, styles.weatherCard]}>
           <View style={styles.cardTopRow}>
             <Text style={styles.cardTag}>HAVA DURUMU</Text>
             <Text style={styles.cardTagIcon}>☁️</Text>
@@ -336,9 +143,9 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.weatherTemp}>{getWeatherValue()}</Text>
           <View style={styles.cardDivider} />
           <Text style={styles.cardDesc}>{getWeatherDescription()}</Text>
-        </SummaryCard>
+        </View>
 
-        <SummaryCard style={[styles.summaryCard, styles.quakeCard]} delay={200}>
+        <View style={[styles.summaryCard, styles.quakeCard]}>
           <View style={styles.cardTopRow}>
             <Text style={[styles.cardTag, styles.quakeTag]}>SON DEPREM</Text>
             <Text style={styles.cardTagIcon}>📍</Text>
@@ -352,69 +159,117 @@ export default function HomeScreen({ navigation }) {
             {getEarthquakeLocation()}
           </Text>
           <Text style={styles.distanceBadge}>📌 {getEarthquakeDistance()}</Text>
-        </SummaryCard>
+        </View>
       </View>
 
-      {/* ── BÖLÜM ETİKETİ ── */}
+      {/* ALTTA TEK BAŞINA: HABER */}
+      <Pressable
+        style={[styles.newsWidgetCard]}
+        onPress={() => navigation.navigate('News')}
+      >
+        <View style={styles.cardTopRow}>
+          <Text style={[styles.cardTag, styles.newsTag]}>SON HABER</Text>
+          <Text style={styles.cardTagIcon}>📰</Text>
+        </View>
+
+        <Text style={styles.newsWidgetTitle}>{getNewsTitle()}</Text>
+
+        <View style={[styles.cardDivider, styles.newsDivider]} />
+
+        <Text style={styles.newsWidgetMeta}>{getNewsSource()}</Text>
+      </Pressable>
+
       <View style={styles.sectionLabel}>
         <View style={styles.sectionLine} />
         <Text style={styles.sectionLabelText}>MODÜLLER</Text>
         <View style={styles.sectionLine} />
       </View>
 
-      {/* ── MODÜLLER ── */}
       <View style={styles.moduleStack}>
-        <ModuleCard
-          emoji="☀️"
-          name="Hava Durumu"
-          hint="Sıcaklık, nem, rüzgar"
-          bgColor="#EEF0FF"
-          iconBg="#D8DCFF"
+        <Pressable
+          style={[styles.moduleCard, { backgroundColor: '#EEF0FF' }]}
           onPress={() => navigation.navigate('Weather')}
-          delay={120}
-        />
-        <ModuleCard
-          emoji="💊"
-          name="Nöbetçi Eczaneler"
-          hint="Güncel nöbetçi eczane listesi"
-          bgColor="#ffddf7"
-          iconBg="#fbbaec"
+        >
+          <View style={[styles.moduleIconWrap, { backgroundColor: '#D8DCFF' }]}>
+            <Text style={styles.moduleEmoji}>☀️</Text>
+          </View>
+          <View style={styles.moduleCenter}>
+            <Text style={styles.moduleName}>Hava Durumu</Text>
+            <Text style={styles.moduleHint}>Sıcaklık, nem, rüzgar</Text>
+          </View>
+          <View style={styles.moduleArrowWrap}>
+            <Text style={styles.moduleArrow}>›</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[styles.moduleCard, { backgroundColor: '#FFEAF8' }]}
           onPress={() => navigation.navigate('Pharmacy')}
-          delay={120}
-        />
-        <ModuleCard
-          emoji="🚌"
-          name="Otobüs Saatleri"
-          hint="Güncel otobüs saatleri"
-          bgColor="#d4ebff"
-          iconBg="#81c3fd"
+        >
+          <View style={[styles.moduleIconWrap, { backgroundColor: '#FFCFEF' }]}>
+            <Text style={styles.moduleEmoji}>💊</Text>
+          </View>
+          <View style={styles.moduleCenter}>
+            <Text style={styles.moduleName}>Nöbetçi Eczaneler</Text>
+            <Text style={styles.moduleHint}>Güncel nöbetçi eczane listesi</Text>
+          </View>
+          <View style={styles.moduleArrowWrap}>
+            <Text style={styles.moduleArrow}>›</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[styles.moduleCard, { backgroundColor: '#E8F4FF' }]}
           onPress={() => navigation.navigate('Bus')}
-          delay={120}
-        />
-        <ModuleCard
-          emoji="📍"
-          name="Son Depremler"
-          hint="Çevre bölge kayıtları"
-          bgColor="#FFF1EE"
-          iconBg="#FFD9D2"
+        >
+          <View style={[styles.moduleIconWrap, { backgroundColor: '#CBE7FF' }]}>
+            <Text style={styles.moduleEmoji}>🚌</Text>
+          </View>
+          <View style={styles.moduleCenter}>
+            <Text style={styles.moduleName}>Otobüs Saatleri</Text>
+            <Text style={styles.moduleHint}>Güncel sefer saatleri</Text>
+          </View>
+          <View style={styles.moduleArrowWrap}>
+            <Text style={styles.moduleArrow}>›</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[styles.moduleCard, { backgroundColor: '#FFF1EE' }]}
           onPress={() => navigation.navigate('Earthquake')}
-          delay={220}
-        />
-        <ModuleCard
-          emoji="📰"
-          name="Haberler"
-          hint="Güncel gelişmeler"
-          bgColor="#EDFCF4"
-          iconBg="#C6F4DB"
+        >
+          <View style={[styles.moduleIconWrap, { backgroundColor: '#FFD9D2' }]}>
+            <Text style={styles.moduleEmoji}>📍</Text>
+          </View>
+          <View style={styles.moduleCenter}>
+            <Text style={styles.moduleName}>Son Depremler</Text>
+            <Text style={styles.moduleHint}>Çevre bölge kayıtları</Text>
+          </View>
+          <View style={styles.moduleArrowWrap}>
+            <Text style={styles.moduleArrow}>›</Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          style={[styles.moduleCard, { backgroundColor: '#EDFCF4' }]}
           onPress={() => navigation.navigate('News')}
-          delay={320}
-        />
+        >
+          <View style={[styles.moduleIconWrap, { backgroundColor: '#C6F4DB' }]}>
+            <Text style={styles.moduleEmoji}>📰</Text>
+          </View>
+          <View style={styles.moduleCenter}>
+            <Text style={styles.moduleName}>Haberler</Text>
+            <Text style={styles.moduleHint}>Güncel gelişmeler</Text>
+          </View>
+          <View style={styles.moduleArrowWrap}>
+            <Text style={styles.moduleArrow}>›</Text>
+          </View>
+        </Pressable>
       </View>
     </ScrollView>
   );
 }
 
-// ── RENKLER ──
 const INDIGO = '#5361FF';
 const SLATE = '#0D1424';
 const MUTED = '#8898B0';
@@ -430,7 +285,6 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
 
-  // BG ORBS
   bgOrb1: {
     position: 'absolute',
     top: -80,
@@ -462,7 +316,6 @@ const styles = StyleSheet.create({
     opacity: 0.05,
   },
 
-  // ── HERO ──
   heroCard: {
     backgroundColor: SLATE,
     borderRadius: 36,
@@ -475,26 +328,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 30,
     elevation: 14,
-  },
-  heroLine1: {
-    position: 'absolute',
-    top: 30,
-    right: -30,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  heroLine2: {
-    position: 'absolute',
-    top: 60,
-    right: -10,
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
   },
   heroBadgeRow: {
     flexDirection: 'row',
@@ -537,19 +370,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     fontWeight: '500',
   },
-
-  // Logo — ortalanmış
-
-
+  logoWrap: {
+    borderRadius: 26,
+    overflow: 'hidden',
+  },
   logo: {
     width: 88,
     height: 88,
-    alignItems: "center",
-    justifyContent: "center",
-
   },
 
-  // ── BÖLÜM ETİKETİ ──
   sectionLabel: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -568,11 +397,10 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
 
-  // ── ÖZET KARTLAR ──
   summaryRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 28,
+    marginBottom: 14,
   },
   summaryCard: {
     flex: 1,
@@ -597,6 +425,19 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 5,
   },
+  newsWidgetCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    padding: 20,
+    minHeight: 130,
+    justifyContent: 'space-between',
+    marginBottom: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 5,
+  },
   cardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -610,6 +451,9 @@ const styles = StyleSheet.create({
   },
   quakeTag: {
     color: MUTED,
+  },
+  newsTag: {
+    color: '#5F6B7A',
   },
   cardTagIcon: {
     fontSize: 16,
@@ -628,6 +472,9 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   quakeDivider: {
+    backgroundColor: '#EEF1F8',
+  },
+  newsDivider: {
     backgroundColor: '#EEF1F8',
   },
   cardDesc: {
@@ -664,8 +511,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: MUTED,
   },
+  newsWidgetTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#182033',
+    lineHeight: 25,
+    marginTop: 8,
+  },
+  newsWidgetMeta: {
+    fontSize: 12,
+    color: '#8A92A3',
+    fontWeight: '600',
+  },
 
-  // ── MODÜLLER ──
   moduleStack: {
     gap: 12,
   },

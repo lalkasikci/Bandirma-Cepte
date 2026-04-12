@@ -1,7 +1,6 @@
 const BANDIRMA_LAT = 40.3522;
 const BANDIRMA_LON = 27.9767;
-
-const MAX_DISTANCE_KM = 150;
+const MAX_DISTANCE_KM = 120;
 
 function toRadians(deg) {
   return deg * (Math.PI / 180);

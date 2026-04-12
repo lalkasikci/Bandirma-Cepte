@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
+import NewsDetailScreen from '../screens/NewsDetailScreen';
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
 import PharmacyScreen from '../screens/PharmacyScreen';
@@ -34,6 +34,13 @@ export default function AppNavigator() {
           component={HomeScreen}
           options={{
             headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="NewsDetail"
+          component={NewsDetailScreen}
+          options={{
+            title: 'Haber Detayı',
           }}
         />
 
