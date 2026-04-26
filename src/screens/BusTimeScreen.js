@@ -1,21 +1,73 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { busLines } from '../data/busTimes';
 
 export default function BusTimeScreen({ navigation }) {
-  return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Pressable
-          style={styles.homeButton}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Text style={styles.homeButtonIcon}>⌂</Text>
-        </Pressable>
+  const today = new Date().getDay();
 
-        <View style={styles.headerTextArea}>
-          <Text style={styles.pageTitle}>Otobüs Saatleri</Text>
-        </View>
-      </View>
-    </View>
+  const getTodayType = () => {
+    if (today === 0) return 'sunday';
+    if (today === 6) return 'saturday';
+    return 'weekday';
+  };
+
+  const todayType = getTodayType();
+
+  const getNextBus = (times) => {
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    return times.find((time) => {
+      const [hour, minute] = time.split(':').map(Number);
+      return hour * 60 + minute > currentMinutes;
+    });
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <Pressable style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
+        <Text style={styles.homeButtonIcon}>⌂</Text>
+      </Pressable>
+
+      <Text style={styles.pageTitle}>Otobüs Saatleri</Text>
+      <Text style={styles.subtitle}>Bandırma şehir içi otobüs hatları</Text>
+
+      {busLines.map((line) => {
+        const times = line[todayType];
+        const nextBus = getNextBus(times);
+
+        return (
+          <View key={line.id} style={styles.card}>
+            <Text style={styles.lineName}>{line.name}</Text>
+            <Text style={styles.route}>{line.route}</Text>
+
+            <Text style={styles.nextBus}>
+              Sonraki Otobüs: {nextBus || 'Bugün başka sefer yok'}
+            </Text>
+
+            <View style={styles.timeContainer}>
+              {times.map((time, index) => (
+            <View
+              key={index}
+              style={[
+                styles.timeBox,
+                time === nextBus && styles.nextTimeBox
+              ]}
+            >
+              <Text
+                style={[
+                  styles.timeText,
+                  time === nextBus && styles.nextTimeText
+                ]}
+              >
+                {time}
+              </Text>
+            </View>
+))}
+            </View>
+          </View>
+        );
+      })}
+    </ScrollView>
   );
 }
 
@@ -26,12 +78,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
   },
-  headerRow: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: 18,
-    gap: 12,
-  },
   homeButton: {
     width: 44,
     height: 44,
@@ -39,10 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#1B1F2A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginBottom: 18,
     elevation: 4,
   },
   homeButtonIcon: {
@@ -50,22 +93,64 @@ const styles = StyleSheet.create({
     color: '#182033',
     fontWeight: '800',
   },
-  headerTextArea: {
-    alignItems: 'center',
-  },
-  topIconRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  screenIcon: {
-    fontSize: 50,
-  },
   pageTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
     color: '#182033',
     textAlign: 'center',
-    marginBottom: 16,
   },
+  subtitle: {
+    fontSize: 14,
+    color: '#8898B0',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 6,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+  },
+  lineName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#182033',
+  },
+  route: {
+    fontSize: 13,
+    color: '#8898B0',
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  nextBus: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#5361FF',
+    marginBottom: 12,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  timeBox: {
+    backgroundColor: '#E8F4FF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  timeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#182033',
+  },
+  nextTimeBox: {
+  backgroundColor: '#007BFF',
+},
+
+nextTimeText: {
+  color: '#FFFFFF',
+},
 });
