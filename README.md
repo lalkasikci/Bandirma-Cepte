@@ -21,7 +21,6 @@ Uygulama kapsamında sunulacak hizmetler:
 
 * React Native
 * React Navigation
-* Firebase Authentication
 * OpenWeather API
 * AFAD / Kandilli Deprem Verileri
 * Haber API
