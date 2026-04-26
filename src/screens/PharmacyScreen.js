@@ -1,17 +1,31 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { pharmacies } from '../data/pharmacies';
 
 export default function PharmacyScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Pressable
-          style={styles.homeButton}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Text style={styles.homeButtonIcon}>⌂</Text>
-        </Pressable>
-      </View>
-    </View>
+    <ScrollView style={styles.container}>
+      <Pressable
+        style={styles.homeButton}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Text style={styles.homeButtonIcon}>⌂</Text>
+      </Pressable>
+
+      <Text style={styles.pageTitle}>Nöbetçi Eczaneler</Text>
+      <Text style={styles.subtitle}>Bugün açık olan eczaneler</Text>
+
+      {pharmacies.map((pharmacy) => (
+        <View key={pharmacy.id} style={styles.card}>
+          <Text style={styles.pharmacyName}>{pharmacy.name}</Text>
+
+          <Text style={styles.label}>Adres:</Text>
+          <Text style={styles.info}>{pharmacy.address}</Text>
+
+          <Text style={styles.label}>Telefon:</Text>
+          <Text style={styles.phone}>{pharmacy.phone}</Text>
+        </View>
+      ))}
+    </ScrollView>
   );
 }
 
@@ -22,12 +36,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
   homeButton: {
     width: 44,
     height: 44,
@@ -35,30 +43,51 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#1B1F2A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginBottom: 18,
     elevation: 4,
+    alignSelf: 'center',
   },
   homeButtonIcon: {
     fontSize: 20,
-    color: '#182033',
     fontWeight: '800',
-  },
-  topIconRow: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  screenIcon: {
-    fontSize: 50,
   },
   pageTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#182033',
     textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#8898B0',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 6,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
     marginBottom: 16,
+    elevation: 3,
+  },
+  pharmacyName: {
+    fontSize: 18,
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 8,
+  },
+  info: {
+    fontSize: 14,
+    color: '#555',
+  },
+  phone: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#007BFF',
+    marginTop: 4,
   },
 });
