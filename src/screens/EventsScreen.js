@@ -17,6 +17,7 @@ export default function EventsScreen() {
     try {
       const response = await fetch("http://localhost:3000/events");
       const data = await response.json();
+
       setEvents(data);
     } catch (error) {
       console.log("ETKİNLİK HATASI:", error);
@@ -33,7 +34,15 @@ export default function EventsScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
-        <Text>Etkinlikler yükleniyor...</Text>
+        <Text style={styles.loadingText}>Etkinlikler yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Etkinlik bulunamadı.</Text>
       </View>
     );
   }
@@ -41,25 +50,28 @@ export default function EventsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Etkinlikler</Text>
+      <Text style={styles.subHeader}>
+        Bandırma Belediyesi etkinlik sayfasından alınan güncel etkinlikler
+      </Text>
 
       <FlatList
         data={events}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <Pressable
             style={styles.card}
             onPress={() => Linking.openURL(item.detailUrl)}
           >
-            <View style={styles.topRow}>
-              <Text style={styles.badge}>{item.category}</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{item.category}</Text>
             </View>
 
             <Text style={styles.title}>{item.title}</Text>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.info}>📅 {item.date}</Text>
-              <Text style={styles.info}>🕒 {item.time}</Text>
-            </View>
+            <Text style={styles.description}>
+              Etkinlik detaylarını görüntülemek için resmi sayfaya gidebilirsiniz.
+            </Text>
 
             <Text style={styles.detail}>Detaylı bilgiye git →</Text>
           </Pressable>
@@ -77,19 +89,36 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
+    backgroundColor: "#F2F4FB",
     alignItems: "center",
     justifyContent: "center",
   },
+  loadingText: {
+    marginTop: 10,
+    color: "#475569",
+    fontWeight: "600",
+  },
+  emptyText: {
+    color: "#475569",
+    fontSize: 16,
+    fontWeight: "600",
+  },
   header: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "900",
-    marginBottom: 18,
     color: "#0D1424",
+    marginBottom: 6,
+  },
+  subHeader: {
+    fontSize: 13,
+    color: "#64748B",
+    marginBottom: 18,
+    lineHeight: 20,
   },
   card: {
     backgroundColor: "#FFFFFF",
     padding: 18,
-    borderRadius: 20,
+    borderRadius: 22,
     marginBottom: 14,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
@@ -97,16 +126,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
   },
-  topRow: {
-    flexDirection: "row",
-    marginBottom: 10,
-  },
   badge: {
+    alignSelf: "flex-start",
     backgroundColor: "#EDE9FE",
-    color: "#5361FF",
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: 999,
+    marginBottom: 12,
+  },
+  badgeText: {
+    color: "#5361FF",
     fontSize: 11,
     fontWeight: "800",
   },
@@ -114,24 +143,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
     color: "#0D1424",
+    lineHeight: 25,
+    marginBottom: 10,
+  },
+  description: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 20,
     marginBottom: 12,
-    lineHeight: 24,
-  },
-  infoBox: {
-    backgroundColor: "#F8FAFC",
-    padding: 12,
-    borderRadius: 14,
-    gap: 6,
-  },
-  info: {
-    fontSize: 14,
-    color: "#475569",
-    fontWeight: "600",
   },
   detail: {
-    marginTop: 12,
     color: "#5361FF",
-    fontWeight: "800",
+    fontSize: 14,
+    fontWeight: "900",
     textAlign: "right",
   },
 });

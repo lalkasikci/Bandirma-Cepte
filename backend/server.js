@@ -32,6 +32,7 @@ app.get("/events", async (req, res) => {
       "KONSER - DİNLETİLER",
       "SÖYLEŞİ VE PANELLER",
       "FİLM GÖSTERİMLERİ",
+      "DETAYLI BİLGİ",
       "DİĞER ETKİNLİKLER",
       "AÇILIŞ",
       "KİTAP GÜNLERİ",
@@ -43,22 +44,10 @@ app.get("/events", async (req, res) => {
       const title = $(el).text().replace(/\s+/g, " ").trim();
       const href = $(el).attr("href");
 
-      const cardText = $(el)
-        .parent()
-        .parent()
-        .parent()
-        .text()
-        .replace(/\s+/g, " ")
-        .trim();
-
-      const dateMatch = cardText.match(/\d{1,2}\s+\w+\s+\d{4}/);
-      const timeMatch = cardText.match(/\d{2}:\d{2}/);
-
       const isRealEvent =
         href &&
         href.includes("etkinlik") &&
-        title.length > 5 &&
-        dateMatch &&
+        title.length > 8 &&
         !unwantedTitles.includes(title.toUpperCase());
 
       if (isRealEvent) {
@@ -69,8 +58,6 @@ app.get("/events", async (req, res) => {
             ? href
             : `https://www.bandirma.bel.tr${href}`,
           category: "Bandırma Belediyesi Etkinliği",
-          date: dateMatch ? dateMatch[0] : "Tarih bilgisi yok",
-          time: timeMatch ? timeMatch[0] : "Saat bilgisi yok",
         });
       }
     });
