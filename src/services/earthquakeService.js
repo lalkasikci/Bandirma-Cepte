@@ -1,6 +1,6 @@
 const BANDIRMA_LAT = 40.3522;
 const BANDIRMA_LON = 27.9767;
-const MAX_DISTANCE_KM = 120;
+const MAX_DISTANCE_KM = 150;
 
 function toRadians(deg) {
   return deg * (Math.PI / 180);
@@ -8,7 +8,6 @@ function toRadians(deg) {
 
 function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
-
   const dLat = toRadians(lat2 - lat1);
   const dLon = toRadians(lon2 - lon1);
 
@@ -25,8 +24,7 @@ function calculateDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 export async function getEarthquakes() {
-  const url = 'https://api.orhanaydogdu.com.tr/deprem/afad/live?limit=50';
-
+  const url = 'https://api.orhanaydogdu.com.tr/deprem/afad/live?limit=100';
   const response = await fetch(url);
 
   if (!response.ok) {

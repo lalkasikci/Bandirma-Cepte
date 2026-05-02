@@ -1,7 +1,30 @@
-import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
-import { pharmacies } from '../data/pharmacies';
+import { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import { getDutyPharmacies } from '../services/pharmacyService';
 
 export default function PharmacyScreen({ navigation }) {
+  const [pharmacies, setPharmacies] = useState([]);
+  const [date, setDate] = useState('Bugün');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPharmacies = async () => {
+      const data = await getDutyPharmacies();
+      setPharmacies(data.pharmacies);
+      setDate(data.date);
+      setLoading(false);
+    };
+
+    fetchPharmacies();
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
       <Pressable
@@ -12,19 +35,29 @@ export default function PharmacyScreen({ navigation }) {
       </Pressable>
 
       <Text style={styles.pageTitle}>Nöbetçi Eczaneler</Text>
-      <Text style={styles.subtitle}>Bugün açık olan eczaneler</Text>
+      <Text style={styles.subtitle}>
+        {date} Bandırma nöbetçi eczaneleri
+      </Text>
 
-      {pharmacies.map((pharmacy) => (
-        <View key={pharmacy.id} style={styles.card}>
-          <Text style={styles.pharmacyName}>{pharmacy.name}</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007BFF" />
+      ) : pharmacies.length === 0 ? (
+        <Text style={styles.emptyText}>
+          Nöbetçi eczane bilgisi alınamadı.
+        </Text>
+      ) : (
+        pharmacies.map((pharmacy) => (
+          <View key={pharmacy.id} style={styles.card}>
+            <Text style={styles.pharmacyName}>{pharmacy.name}</Text>
 
-          <Text style={styles.label}>Adres:</Text>
-          <Text style={styles.info}>{pharmacy.address}</Text>
+            <Text style={styles.label}>Adres:</Text>
+            <Text style={styles.info}>{pharmacy.address}</Text>
 
-          <Text style={styles.label}>Telefon:</Text>
-          <Text style={styles.phone}>{pharmacy.phone}</Text>
-        </View>
-      ))}
+            <Text style={styles.label}>Telefon:</Text>
+            <Text style={styles.phone}>{pharmacy.phone}</Text>
+          </View>
+        ))
+      )}
     </ScrollView>
   );
 }
@@ -49,11 +82,13 @@ const styles = StyleSheet.create({
   },
   homeButtonIcon: {
     fontSize: 20,
+    color: '#182033',
     fontWeight: '800',
   },
   pageTitle: {
     fontSize: 26,
     fontWeight: '800',
+    color: '#182033',
     textAlign: 'center',
   },
   subtitle: {
@@ -73,21 +108,30 @@ const styles = StyleSheet.create({
   pharmacyName: {
     fontSize: 18,
     fontWeight: '800',
+    color: '#182033',
     marginBottom: 10,
   },
   label: {
     fontSize: 14,
     fontWeight: '700',
     marginTop: 8,
+    color: '#182033',
   },
   info: {
     fontSize: 14,
     color: '#555',
+    marginTop: 4,
   },
   phone: {
     fontSize: 15,
     fontWeight: '700',
     color: '#007BFF',
     marginTop: 4,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#8898B0',
+    marginTop: 20,
+    fontSize: 14,
   },
 });

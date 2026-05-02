@@ -7,7 +7,7 @@ import PharmacyScreen from '../screens/PharmacyScreen';
 import BusTimeScreen from '../screens/BusTimeScreen';
 import WeatherScreen from '../screens/WeatherScreen';
 import EarthquakeScreen from '../screens/EarthquakeScreen';
-
+import EmergencyNumbersScreen from '../screens/EmergencyNumbersScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -81,6 +81,13 @@ export default function AppNavigator() {
             headerShown: false,
           }}
         />
+        <Stack.Screen 
+        name="Emergency" 
+        component={EmergencyNumbersScreen}
+        options={{
+        headerShown: false,
+        }}
+            />
       </Stack.Navigator>
     </NavigationContainer>
   );

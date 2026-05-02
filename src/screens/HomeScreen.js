@@ -257,9 +257,8 @@ export default function HomeScreen({ navigation }) {
           {/* 5 modül: 2 + 3 satır ya da tek satır kaydırmalı */}
           <View style={styles.modGrid}>
             {[
-              { route: 'Weather',    bg: '#EEF0FF', iconBg: '#D8DCFF', emoji: '☀️', name: 'Hava\nDurumu' },
-              { route: 'News',       bg: '#EDFCF4', iconBg: '#C6F4DB', emoji: '📰', name: 'Haberler' },
-              { route: 'Earthquake', bg: '#FFF1EE', iconBg: '#FFD9D2', emoji: '📍', name: 'Depremler' },
+              
+              { route: 'Emergency', name: 'Acil\nNumaralar', bg: '#ffd6d6', iconBg: '#fca4a4', emoji: '🚨' },
               { route: 'Pharmacy',   bg: '#FFEAF8', iconBg: '#FFCFEF', emoji: '💊', name: 'Eczaneler' },
               { route: 'Bus',        bg: '#E8F4FF', iconBg: '#CBE7FF', emoji: '🚌', name: 'Otobüs\nSaatleri' },
             ].map((item) => (
