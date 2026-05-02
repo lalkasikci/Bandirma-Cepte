@@ -8,6 +8,8 @@ import BusTimeScreen from '../screens/BusTimeScreen';
 import WeatherScreen from '../screens/WeatherScreen';
 import EarthquakeScreen from '../screens/EarthquakeScreen';
 import EmergencyNumbersScreen from '../screens/EmergencyNumbersScreen';
+import EventsScreen from "../screens/EventsScreen";
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -88,6 +90,14 @@ export default function AppNavigator() {
         headerShown: false,
         }}
             />
+        <Stack.Screen 
+      name="Events" 
+      component={EventsScreen} 
+      options={{
+        headerShown: false,
+      }}
+/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );

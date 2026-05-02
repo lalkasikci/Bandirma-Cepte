@@ -68,7 +68,7 @@ export default function HomeScreen({ navigation }) {
   const [news,        setNews]        = useState([]);
   const [loading,     setLoading]     = useState(true);
 
-  /* canlı nokta */
+  
   const dotScale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     Animated.loop(Animated.sequence([
@@ -259,6 +259,7 @@ export default function HomeScreen({ navigation }) {
             {[
               
               { route: 'Emergency', name: 'Acil\nNumaralar', bg: '#ffd6d6', iconBg: '#fca4a4', emoji: '🚨' },
+              { route: 'Events', bg: '#EDE9FE', iconBg: '#DDD6FE', emoji: '🎭', name: 'Etkinlikler' },
               { route: 'Pharmacy',   bg: '#FFEAF8', iconBg: '#FFCFEF', emoji: '💊', name: 'Eczaneler' },
               { route: 'Bus',        bg: '#E8F4FF', iconBg: '#CBE7FF', emoji: '🚌', name: 'Otobüs\nSaatleri' },
             ].map((item) => (
